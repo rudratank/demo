@@ -4,15 +4,22 @@ const StudentList = () => {
     const [students, setStudents] = useState([]);
     const [loaded, setLoaded] = useState(false);
 
-    const loadStudents = async () => {
-        try {
-            const response = await fetch('http://localhost:5000/api/students');
-            const data = await response.json();
-            setStudents(data);
-            setLoaded(true);
-        } catch (error) {
-            console.error("Error fetching students:", error);
-        }
+    const loadStudents = () => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'http://localhost:5000/api/students', true);
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                const data = JSON.parse(xhr.responseText);
+                setStudents(data);
+                setLoaded(true);
+            } else {
+                console.error("Error fetching students:", xhr.statusText);
+            }
+        };
+        xhr.onerror = () => {
+            console.error("Error fetching students:", xhr.statusText);
+        };
+        xhr.send();
     };
 
     return (
@@ -23,11 +30,7 @@ const StudentList = () => {
             <button
                 onClick={loadStudents}
                 disabled={loaded}
-                className={`px-6 py-2 rounded-lg font-semibold text-white ${
-                    loaded
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600"
-                }`}
+                className={`px-6 py-2 rounded-lg font-semibold text-white ${loaded ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"}`}
             >
                 {loaded ? "Loaded" : "Load Students"}
             </button>
@@ -45,11 +48,7 @@ const StudentList = () => {
                             {students.map((student, index) => (
                                 <tr
                                     key={index}
-                                    className={`${
-                                        index % 2 === 0
-                                            ? "bg-gray-100"
-                                            : "bg-white"
-                                    }`}
+                                    className={`${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
                                 >
                                     <td className="px-4 py-2">{index + 1}</td>
                                     <td className="px-4 py-2">{student.name}</td>
